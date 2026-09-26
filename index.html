@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random English Words</title>
+<style>
+  :root {
+    --bg-color: #0d1117; /* Latar belakang gelap */
+    --vein-blue: #1b3a57;
+    --vein-blue-hover: #2a5b8a;
+    --vein-purple: #3d2352;
+    --vein-purple-hover: #5d367d;
+    --vein-red: #4a1d26;
+    --vein-red-hover: #732d3b;
+    --text-color: #e6edf3;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    color: #6a8caf;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  /* Grid Responsif pengganti Tabel */
+  #word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 30px;
+  }
+
+  /* Desain Tombol Organik (Varicocele Theme) */
+  .word-btn {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 25px 10px 25px 10px; /* Bentuk asimetris seperti pembuluh vena */
+    box-shadow: inset 0px 0px 8px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .word-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Palet Warna Acak berbasis Tema */
+  .theme-blue { background: linear-gradient(145deg, #12273b, var(--vein-blue)); }
+  .theme-blue:hover { background: linear-gradient(145deg, var(--vein-blue), var(--vein-blue-hover)); }
+  
+  .theme-purple { background: linear-gradient(145deg, #271636, var(--vein-purple)); }
+  .theme-purple:hover { background: linear-gradient(145deg, var(--vein-purple), var(--vein-purple-hover)); }
+  
+  .theme-red { background: linear-gradient(145deg, #301319, var(--vein-red)); }
+  .theme-red:hover { background: linear-gradient(145deg, var(--vein-red), var(--vein-red-hover)); }
+
+  /* Tooltip Diperbaiki */
+  .word-btn .tooltiptext {
+    visibility: hidden;
+    width: 130px;
+    background-color: #222;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    font-weight: normal;
+    pointer-events: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  }
+
+  .word-btn .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #222 transparent transparent transparent;
+  }
+
+  .word-btn:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Tombol More */
+  #tambah-btn {
+    background: linear-gradient(145deg, #2b3a4a, #4a627a);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  #tambah-btn:hover {
+    background: linear-gradient(145deg, #3c5166, #5d7a99);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    transform: translateY(-2px);
+  }
+</style>
+</head>
+<body>
+
+  <h1>Random English Words</h1>
+  <div id="word-grid"></div>
+  <button id="tambah-btn" onclick="buatGridKata()">Load More Words...</button>
+
+  <script src="https://cdn.jsdelivr.net/gh/swrdfgd/Random-Link/englishWords.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/swrdfgd/Random-Link/englishVerbs.js"></script>
+
+  <script>
+    // Konfigurasi Tema Warna
+    const themeClasses = ['theme-blue', 'theme-purple', 'theme-red'];
+
+    // Fungsi untuk mendapatkan data kata, verb, dan link secara acak
+    function getRandomWordData() {
+      // Pastikan variabel dari eksternal script sudah ada, beri fallback agar tidak error
+      const kataArr = (typeof kataEnglish !== 'undefined') ? kataEnglish : ['word', 'example'];
+      const verbArr = (typeof verbEnglish !== 'undefined') ? verbEnglish : ['do', 'make'];
+
+      const kata = kataArr[Math.floor(Math.random() * kataArr.length)];
+      const verb = verbArr[Math.floor(Math.random() * verbArr.length)];
+      
+      const kataCapital = kata.charAt(0).toUpperCase() + kata.substring(1);
+      const verbCapital = verb.charAt(0).toUpperCase() + verb.substring(1);
+
+      // Daftar kombinasi [Label Tombol, Link Tujuan, Nama Sumber Tooltip]
+      const daftarLink = [
+        [kataCapital, `https://www.powerthesaurus.org/${kata}/synonyms`, 'PowerThesaurus'],
+        [verbCapital, `https://www.theconjugator.com/english/verb/to+${verb}.html`, 'TheConjugator'],
+        [kataCapital, `https://www.britannica.com/dictionary/${kata}`, 'Britannica'],
+        [kataCapital, `https://www.merriam-webster.com/dictionary/${kata}`, 'Merriam-Webster'],
+        [kataCapital, `https://definition.org/define/${kata}/`, 'Definition.org'],
+        [kataCapital, `https://www.collinsdictionary.com/us/dictionary/english/${kata}`, 'Collins'],
+        [kataCapital, `https://www.dictionary.com/browse/${kata}`, 'Dictionary.com']
+      ];
+
+      return daftarLink[Math.floor(Math.random() * daftarLink.length)];
+    }
+
+    // Fungsi untuk membuat elemen ke dalam grid
+    function buatGridKata() {
+      const grid = document.getElementById('word-grid');
+      
+      // Tambahkan 25 kata baru setiap kali dipanggil
+      for(let i = 0; i < 25; i++) {
+        const data = getRandomWordData();
+        const wordText = data[0];
+        const wordLink = data[1];
+        const sourceName = data[2];
+
+        // Buat elemen anchor (tombol)
+        const a = document.createElement('a');
+        a.href = wordLink;
+        a.target = '_blank';
+        
+        // Pilih kelas warna acak dari palet tema varicocele
+        const randomTheme = themeClasses[Math.floor(Math.random() * themeClasses.length)];
+        a.className = `word-btn ${randomTheme}`;
+        a.textContent = wordText;
+
+        // Buat elemen tooltip
+        const tooltip = document.createElement('span');
+        tooltip.className = 'tooltiptext';
+        tooltip.textContent = `Open in ${sourceName}`;
+        
+        a.appendChild(tooltip);
+        grid.appendChild(a);
+      }
+    }
+
+    // Inisialisasi saat halaman dimuat
+    window.onload = function() {
+      // Sedikit jeda untuk memastikan script eksternal termuat via CDN
+      setTimeout(() => {
+        buatGridKata();
+      }, 300);
+    };
+  </script>
+</body>
+</html>
